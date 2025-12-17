@@ -1,4 +1,5 @@
 import os
+import re
 from openai import OpenAI
 from typing import Dict, List
 from dotenv import load_dotenv
@@ -18,13 +19,14 @@ class Stage1Extractor:
     
     def extract(self, text_chunk: str, chunk_type: str, schema: Dict) -> List[Dict]:
         """
-        Extract blocks from chunk using Stage 1 schema
+        Extract blocks (or values for cover) from chunk using Stage 1 schema
         
-        Returns list of blocks:
+        Returns list of blocks/fields:
         {
             'blockId': str,
             'valueType': str,
-            'text': str
+            'text': str,
+            'isCoverField': bool (optional)
         }
         """
         # Build prompt
@@ -44,12 +46,73 @@ class Stage1Extractor:
         output_text = response.choices[0].message.content
         blocks = self._parse_output(output_text, schema)
         
+        # Special handling for cover page: deterministic normalization
+        if chunk_type == 'cover':
+            for block in blocks:
+                block['isCoverField'] = True
+                if 'text' in block and block['text'] and block['text'] != 'Not Found':
+                    block['text'] = self._normalize_cover_value(block['text'], block.get('blockId', ''))
+        
         return blocks
+
+    def _normalize_cover_value(self, value: str, field_id: str) -> str:
+        """
+        Deterministically normalize cover page values:
+        - Remove role suffixes (as Borrower, as Holdings, etc.)
+        - Strip date prefixes (dated as of)
+        - Take entity name before commas
+        - Clean up whitespace
+        """
+        if not value or value == 'Not Found':
+            return value
+
+        normalized = value.strip()
+
+        # 1. Remove date prefixes
+        normalized = re.sub(r'^dated\s+as\s+of\s+', '', normalized, flags=re.IGNORECASE)
+
+        # 2. Remove role suffixes
+        roles = [
+            'as Borrower', 'as Holdings', 'as Guarantor', 'as Guarantors',
+            'as Administrative Agent', 'as Agent', 'as Lead Arranger', 
+            'as Joint Lead Arranger', 'as Bookrunner', 'as Syndication Agent',
+            'as Documentation Agent', 'as Collateral Agent'
+        ]
+        for role in roles:
+            # Match role at the end of string, possibly preceded by a comma or "and"
+            pattern = r'(?:,\s*|\s+and\s+)?' + re.escape(role) + r'\s*$'
+            normalized = re.sub(pattern, '', normalized, flags=re.IGNORECASE)
+
+        # 3. Handle entity names: take text before the first comma 
+        # (unless the field is specifically a date or title)
+        if field_id not in ['agreementTitle', 'effectiveDate']:
+            if ',' in normalized:
+                # Be careful not to strip too much if it's a list, but usually 
+                # legal entities have suffixes after commas like ", Inc." or ", LLC"
+                # We want to keep the suffix if it's Inc/LLC/Corp
+                parts = [p.strip() for p in normalized.split(',')]
+                if len(parts) > 1:
+                    suffix = parts[1].strip().upper()
+                    # Keep common legal entity suffixes (Inc, LLC, etc.)
+                    # Match only if the suffix is exactly one of these or starts with them
+                    legal_suffixes = [
+                        r'^INC\.?$', r'^LLC\s*$', r'^CORP\.?$', r'^L\.P\.?$', 
+                        r'^LTD\.?$', r'^N\.A\.?$', r'^CORPORATION$', r'^INCORPORATED$'
+                    ]
+                    if any(re.search(s, suffix) for s in legal_suffixes):
+                        normalized = f"{parts[0]}, {parts[1]}"
+                    else:
+                        normalized = parts[0]
+
+        return normalized.strip()
     
     def _build_prompt(self, text_chunk: str, chunk_type: str, schema: Dict) -> str:
         """Build Stage 1 extraction prompt"""
         # Convert schema to string format
         schema_str = self._format_schema_for_prompt(schema)
+        
+        if chunk_type == 'cover':
+            return self._build_cover_prompt(text_chunk, schema_str)
         
         prompt = f"""You are an expert legal document analyst specializing in credit agreements.
 
@@ -145,6 +208,50 @@ BEGIN STAGE 1 EXTRACTION
 ────────────────────────────────────────"""
         
         return prompt
+
+    def _build_cover_prompt(self, text_chunk: str, schema_str: str) -> str:
+        """Special direct-value extraction prompt for cover page"""
+        return f"""You are an expert legal document analyst.
+Your task is to EXTRACT SPECIFIC VALUES from the COVER PAGE of a credit agreement.
+
+────────────────────────────────────────
+CRITICAL RULES (COVER PAGE)
+────────────────────────────────────────
+1. Extract the EXACT values requested. Do NOT extract blocks of text.
+2. For entity names (Borrower, Agents, etc.), extract the FULL legal name.
+3. For the date, extract the date as written.
+4. If a value is not present, return "Not Found".
+5. Do NOT include descriptions or roles (like "as Borrower") in your output if possible, though they will be cleaned later.
+
+────────────────────────────────────────
+OUTPUT REQUIREMENTS
+────────────────────────────────────────
+For EACH field defined in the schema, output exactly one entry using this format:
+
+BlockId: <fieldId>
+ValueType: <valueType>
+BlockText: <extracted value or "Not Found">
+
+• Do NOT include explanations.
+• Do NOT include JSON.
+• Preserve original wording for the value itself.
+
+────────────────────────────────────────
+SCHEMA CONTEXT
+────────────────────────────────────────
+Chunk Type: cover
+
+FIELDS TO EXTRACT:
+{schema_str}
+
+────────────────────────────────────────
+DOCUMENT CHUNK (COVER PAGE)
+────────────────────────────────────────
+{text_chunk}
+
+────────────────────────────────────────
+BEGIN COVER PAGE EXTRACTION
+────────────────────────────────────────"""
     
     def _format_schema_for_prompt(self, schema: Dict) -> str:
         """Format schema JSON for prompt"""
@@ -214,9 +321,9 @@ BEGIN STAGE 1 EXTRACTION
                     collecting_text = True
             
             elif collecting_text:
-                # Continue collecting text until next BlockId or empty line that signals block end
+                # Continue collecting text until next BlockId
                 # Only stop if we see a new BlockId (which we already handled above)
-                # Preserve original line formatting (including empty lines within the block)
+                # Preserve original line formatting
                 if current_block and 'text' in current_block:
                     # Append with newline to preserve structure
                     if current_block['text']:
@@ -234,4 +341,3 @@ BEGIN STAGE 1 EXTRACTION
             blocks.append(current_block)
         
         return blocks
-
