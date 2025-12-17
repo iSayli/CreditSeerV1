@@ -550,22 +550,18 @@
                                 </div>
                                 ${chunkResult.blocks.map((block, blockIdx) => {
                                     const blockTextId = `block-text-${chunkResult.chunkId}-${blockIdx}`;
-                                    const isCoverField = block.isCoverField || false;
                                     return `
                                     <div style="margin: 10px 0; padding: 15px; background: #f5f5f5; border-radius: 4px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                             <div>
                                                 <strong>${block.blockId}</strong> (${block.valueType})
-                                                ${isCoverField ? '<span style="margin-left: 10px; padding: 2px 6px; background: #e3f2fd; color: #1976d2; border-radius: 4px; font-size: 0.8em; font-weight: bold;">Direct Value</span>' : ''}
                                             </div>
-                                            ${!isCoverField ? `
                                             <button class="expand-btn" onclick="toggleBlockText('${blockTextId}')" style="font-size: 0.85em; padding: 6px 12px;">
                                                 Show Full Text
                                             </button>
-                                            ` : ''}
                                         </div>
-                                        <div id="${blockTextId}" style="${isCoverField ? 'display: block;' : 'display: none;'}">
-                                            <pre style="white-space: pre-wrap; word-wrap: break-word; background: #fff; padding: 10px; border-radius: 4px; border: 1px solid #ddd; max-height: 500px; overflow-y: auto; font-size: 0.9em; ${isCoverField ? 'border-left: 4px solid #1976d2;' : ''}">${block.text || 'Not Found'}</pre>
+                                        <div id="${blockTextId}" style="display: none;">
+                                            <pre style="white-space: pre-wrap; word-wrap: break-word; background: #fff; padding: 10px; border-radius: 4px; border: 1px solid #ddd; max-height: 500px; overflow-y: auto; font-size: 0.9em;">${block.text || 'Not Found'}</pre>
                                         </div>
                                     </div>
                                 `;

@@ -3,21 +3,16 @@
     "sectionType": "eventsOfDefault",
     "schemasByValueType": {
       "eventOfDefault": {
-        "defaultCategory": {
-          "extractionHint": {
-            "notes": "Classify the default based on the block content (e.g., Payment Default, Covenant Default, Bankruptcy, Cross-Default, Judgment, Change in Control).",
-            "type": "text"
-          }
-        },
-  
         "affectedObligation": {
+          "outputMode": "summarized",
           "extractionHint": {
-            "notes": "Extract what obligation, covenant, or liability is breached (e.g., principal, interest, covenants, Indebtedness).",
+            "notes": "Summarize the obligation breached (e.g., principal, interest, covenants, Material Indebtedness).",
             "type": "text"
           }
         },
   
         "gracePeriod": {
+          "collectMultiple": true,
           "extractionHint": {
             "pattern": "(Business Days|days)",
             "notes": "Extract any grace or cure period (e.g., 'five Business Days', '30 days'). If none, return Not Found.",
@@ -46,13 +41,6 @@
             "pattern": "provided that|provided, further|except",
             "notes": "Extract carve-outs, exclusions, or limiting conditions that prevent the default from triggering.",
             "type": "text"
-          }
-        },
-  
-        "automaticDefault": {
-          "extractionHint": {
-            "notes": "Determine whether the default applies automatically (e.g., bankruptcy events) or only after notice/grace. Output 'Yes', 'No', or 'Not Found'.",
-            "type": "boolean"
           }
         }
       },

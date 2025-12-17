@@ -5,8 +5,7 @@
       {
         "blockId": "feesGeneral",
         "label": "Fees (General)",
-        "anchorPattern": "SECTION\\s+2\\.05\\.|Fees\\s*\\.",
-        "valueType": "fees"
+        "anchorPattern": "Fees\\s*\\."
       },
   
       {
@@ -36,34 +35,34 @@
         "anchorPattern": "Closing Date upfront fees|Closing Fee|Upfront Fee",
         "valueType": "fee"
       },
+
+      {
+        "blockId": "interestGeneral",
+        "label": "Interest (General)",
+        "anchorPattern": "Interest|Interest on Revolving Loans|Interest on Term Loans|Interest on Loans"
+      },
   
       {
         "blockId": "interestABR",
         "label": "Interest – ABR Loans",
-        "anchorPattern": "ABR Borrowing|ABR Loans",
+        "anchorPattern": "comprising each ABR Borrowing|ABR Loans",
         "valueType": "interest"
       },
   
       {
         "blockId": "interestEurodollar",
         "label": "Interest – Eurodollar Loans",
-        "anchorPattern": "Eurodollar Borrowing|Eurodollar Loans",
+        "anchorPattern": "comprising each Eurodollar Borrowing|Eurodollar Loans",
         "valueType": "interest"
       },
-  
+
       {
         "blockId": "defaultInterest",
         "label": "Default Interest",
-        "anchorPattern": "Default Interest|Default Rate",
+        "anchorPattern": "Default Interest|Default Rate|shall bare interest",
         "valueType": "interest"
-      },
-  
-      {
-        "blockId": "alternateRateMechanics",
-        "label": "Alternate Rate of Interest",
-        "anchorPattern": "Alternate Rate of Interest",
-        "valueType": "interestMechanics"
       }
+
     ]
   }
   

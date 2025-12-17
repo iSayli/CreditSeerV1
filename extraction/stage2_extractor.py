@@ -103,7 +103,8 @@ CRITICAL RULES (STAGE 2)
 6. For each field, the output MUST be either:
    • verbatim text copied from the block text if it exists (default behavior), 
    • a CONCISE SUMMARY if outputMode = "summarized" is defined in the schema (see below for summary rules), or
-   • the exact string "Not Found" if it does not exist.
+   • the exact string "Not Found" if it does not exist. 
+7. You must display the field name even if the value is "Not Found".
 ────────────────────────────────────────
 BLOCK ROUTING RULE
 ────────────────────────────────────────

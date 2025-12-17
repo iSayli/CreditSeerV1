@@ -247,6 +247,30 @@ def run_stage2():
             chunk_type = stage1_data['chunkType']
             blocks = stage1_data['blocks']
             
+            # Skip Stage 2 for cover pages - Stage 1 already returned normalized values
+            if chunk_type == 'cover':
+                # Map Stage 1 "BlockText" to Stage 2 "values" for UI consistency
+                cover_extractions = []
+                for block in blocks:
+                    block_id = block.get('blockId', 'Unknown')
+                    text = block.get('text', '')
+                    
+                    if text and text != 'Not Found':
+                        cover_extractions.append({
+                            'blockId': block_id,
+                            'valueType': block.get('valueType', ''),
+                            'values': {block_id: text},
+                            'confidence': {block_id: {'level': 'High', 'score': 1.0, 'percentage': 100.0, 'factors': [{'factor': 'Stage 1 Direct', 'status': 'Normalized from cover', 'score': 1, 'max': 1}]}},
+                            'isCover': True
+                        })
+                
+                stage2_results[chunk_id] = {
+                    'chunkId': chunk_id,
+                    'chunkType': chunk_type,
+                    'extractions': cover_extractions
+                }
+                continue
+
             # Load Stage 2 schema if available
             schema = schema_loader.load_stage2_schema(chunk_type)
             if not schema:

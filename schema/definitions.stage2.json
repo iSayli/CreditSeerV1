@@ -6,7 +6,7 @@
       "date": {
         "dateValue": {
           "extractionHint": {
-            "pattern": "(shall mean|means)",
+            "pattern": "(shall mean|means|with respect to)",
             "notes": "Extract the date or date expression following this phrase. May be a concrete date or a relative expression (e.g., '364 days after the Closing Date').",
             "type": "date"
           }

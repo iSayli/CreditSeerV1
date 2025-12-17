@@ -5,9 +5,9 @@
         "fee": {
             "feeRate": {
                 "extractionHint": {
-                "pattern": "(\\d+\\.\\d+%|\\d+%)",
-                "notes": "Extract the fee rate if stated as a percentage.",
-                "type": "quantitative_metric"
+                "pattern": "(\\d+\\.\\d+%|\\d+%|Applicable Fee|Applicable Margin)",
+                "notes": "Extract the fee rate. It may be a percentage or a defined term like 'Applicable Fee' or 'Applicable Margin'.",
+                "type": "text"
                 }
             },
             "feeBase": {
@@ -19,12 +19,13 @@
             },
             "accrualPeriod": {
                 "extractionHint": {
-                "pattern": "(from and including|during the period)",
+                "pattern": "(from and including|from and after|during the period|commencing on|beginning on).*?(to but excluding|until|through)",
                 "notes": "Extract the accrual period language.",
                 "type": "text"
                 }
             },
             "paymentTiming": {
+                "collectMultiple": true,
                 "extractionHint": {
                 "pattern": "(payable in arrears|payable on|on the Closing Date|on demand)",
                 "notes": "Extract when the fee is payable.",
@@ -42,8 +43,8 @@
         "interest": {
             "baseRate": {
                 "extractionHint": {
-                "pattern": "(Alternate Base Rate|Adjusted LIBO Rate)",
-                "notes": "Extract the base rate used.",
+                "pattern": "(Alternate Base Rate|Adjusted LIBO Rate|SOFR Rate|Prime Rate)",
+                "notes": "Extract the base rate used. The pattern given is a list of possible base rates.",
                 "type": "text"
                 }
             },
@@ -66,23 +67,6 @@
                 "extractionHint": {
                 "pattern": "(Interest Payment Dates|payable in arrears|payable on demand)",
                 "notes": "Extract when interest is payable.",
-                "type": "text"
-                }
-            }
-        },
-        "interestMechanics": {
-            "fallbackTrigger": {
-                "extractionHint": {
-                "pattern": "(not generally available|unable to ascertain|reasonable means do not exist)",
-                "notes": "Extract conditions triggering alternate rate mechanics.",
-                "type": "text"
-                }
-            },
-            "fallbackEffect": {
-                "outputMode": "summarized",
-                "extractionHint": {
-                "pattern": "(shall be deemed|shall be a request for)",
-                "notes": "Summarize what happens once fallback is triggered.",
                 "type": "text"
                 }
             }

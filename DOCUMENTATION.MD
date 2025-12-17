@@ -92,31 +92,31 @@ Once processing is complete, you click the "Chunk Text" button. The application 
 #### Step 5: Stage 1 - Block Discovery
 You click the "Run Stage 1" button. For each chunk that has a Stage 1 schema, the system:
 
-1. **Loads the Stage 1 Schema**: Matches the chunk's `chunkType` to the appropriate schema (e.g., `definitions.stage1.json`)
-2. **Sends to LLM**: Creates a prompt with the schema's block definitions (anchor patterns, labels, valueTypes)
-3. **LLM Identifies Blocks**: The AI locates each block using anchor patterns and semantic matching
-4. **Extracts Block Text**: For each block found, extracts the **entire verbatim text** (including tables, formulas, multi-paragraph content)
-5. **Assigns ValueType**: Each block gets a `valueType` (e.g., `commitment`, `covenant`, `fee`, `eventOfDefault`)
-6. **Returns "Not Found"**: If a block isn't present, returns `"Not Found"` for that block
+1. **Loads the Stage 1 Schema**: Matches the chunk's `chunkType` to the appropriate schema (e.g., `definitions.stage1.json`).
+2. **Specialized Cover Page Handling**: 
+   - If the chunk is a **Cover Page**, it uses a specialized prompt designed for **normalized extraction** rather than verbatim block discovery.
+   - It extracts clean entity names, dates, and titles.
+   - It strips role descriptors (e.g., "as Borrower") and legal boilerplate (e.g., "a Delaware corporation").
+   - It returns normalized values directly in the `BlockText` field.
+3. **Standard Block Discovery (Other Chunks)**:
+   - Creates a prompt with the schema's block definitions (anchor patterns, labels, valueTypes).
+   - LLM locates each block using anchor patterns and semantic matching.
+   - Extracts the **entire verbatim text** (including tables, formulas, multi-paragraph content).
+4. **Assigns ValueType**: Each block gets a `valueType` (e.g., `commitment`, `covenant`, `fee`, `eventOfDefault`).
+5. **Returns "Not Found"**: If a block isn't present, returns `"Not Found"` for that block.
 
-**Result**: You see a list of blocks for each chunk, with full block text that can be expanded to view. Each block has a `blockId`, `valueType`, and `text`.
+**Result**: You see a list of blocks for each chunk. For cover pages, these are clean, normalized values. For other sections, these are full verbatim text blocks that can be expanded to view.
 
 #### Step 6: Stage 2 - Value Extraction with Confidence
 You click the "Run Stage 2" button. For each block that was found in Stage 1:
 
-1. **Skips Missing Blocks**: Blocks marked `"Not Found"` in Stage 1 are automatically skipped (no LLM call made)
-2. **Loads Stage 2 Schema**: Matches the block's `valueType` to the appropriate schema section
-3. **Sends to LLM**: Creates a prompt with field definitions, extraction hints, and the block text
-4. **LLM Extracts Values**: The AI extracts structured values from the block text only
-5. **Calculates Confidence**: For each extracted value, calculates confidence using 7 factors:
-   - Value Presence (0-3 points)
-   - Format Validity (0-2 points)
-   - Evidence Support (0-2 points)
-   - Completeness (0-1 point)
-   - Anchor Proximity (0-1 point)
-   - Ambiguity Penalty (-0.5 to 0)
-   - Faithfulness (0-1 point, for summarized outputs)
-6. **Returns Results**: Structured values with confidence levels (High/Medium/Low/Not Present) and detailed factor breakdowns
+1. **Skips Cover Pages**: Since cover page data was already normalized and extracted in Stage 1, Stage 2 is skipped for these chunks. The Stage 1 results are mapped directly to the final output for consistency.
+2. **Skips Missing Blocks**: Blocks marked `"Not Found"` in Stage 1 are automatically skipped (no LLM call made).
+3. **Loads Stage 2 Schema**: Matches the block's `valueType` to the appropriate schema section.
+4. **Sends to LLM**: Creates a prompt with field definitions, extraction hints, and the block text.
+5. **LLM Extracts Values**: The AI extracts structured values from the block text only.
+6. **Calculates Confidence**: For each extracted value, calculates confidence using 7 factors.
+7. **Returns Results**: Structured values with confidence levels (High/Medium/Low/Not Present) and detailed factor breakdowns.
 
 **Result**: You see extracted values organized by block, with confidence levels and expandable details showing how confidence was calculated.
 
@@ -1013,25 +1013,24 @@ CreditSeerV1/
 **Core Strategy:**
 
 1. **Schema-Based Block Identification**: 
-   - Uses predefined Stage 1 JSON schemas
-   - Each schema defines blocks to find (anchorPattern, label, valueType)
-   - Extraction hints guide the AI
+   - Uses predefined Stage 1 JSON schemas.
+   - Each schema defines blocks to find (anchorPattern, label, valueType).
 
-2. **Prompt Engineering**:
-   - System message (anti-hallucination)
-   - Full schema with block definitions
-   - Chunk text (up to 150,000 characters)
-   - Clear block extraction instructions
+2. **Specialized Cover Page Extraction**:
+   - Uses a specialized prompt for the `cover` chunk type.
+   - Extracts clean, normalized entity names and dates.
+   - Strips role descriptors (e.g., "as Borrower") and legalboilerplate.
+   - Returns normalized values directly in the Stage 1 output.
 
-3. **Block Extraction**:
-   - Locates blocks using anchor patterns and semantic equivalents
-   - Extracts entire verbatim block text (multiline support)
-   - Assigns valueType to each block
-   - Returns "Not Found" for missing blocks
+3. **Standard Block Discovery (Other Sections)**:
+   - Locates blocks using anchor patterns and semantic equivalents.
+   - Extracts entire verbatim block text (multiline support).
+   - Assigns valueType to each block.
+   - Returns "Not Found" for missing blocks.
 
 4. **Multiline Text Handling**:
-   - Preserves tables, spacing, multi-paragraph content
-   - Handles complex block structures
+   - Preserves tables, spacing, multi-paragraph content.
+   - Handles complex block structures.
 
 **Key Features:**
 - Multiline text preservation
@@ -1047,15 +1046,20 @@ CreditSeerV1/
 
 **Core Strategy:**
 
-1. **Block Skipping Optimization**: 
-   - Automatically skips blocks marked "Not Found" in Stage 1
-   - Reduces LLM calls by ~42%
-   - Returns empty result for skipped blocks
+1. **Cover Page Skipping**:
+   - Automatically skips Stage 2 LLM calls for `cover` chunks.
+   - Stage 1 already provides normalized values for cover pages.
+   - Maps Stage 1 results directly to Stage 2 output format for UI consistency.
 
-2. **Schema-Based Extraction**: 
-   - Uses predefined Stage 2 JSON schemas
-   - Routes by block's valueType
-   - Each schema section defines fields to extract
+2. **Block Skipping Optimization**: 
+   - Automatically skips blocks marked "Not Found" in Stage 1.
+   - Reduces LLM calls by ~42%.
+   - Returns empty result for skipped blocks.
+
+3. **Schema-Based Extraction**: 
+   - Uses predefined Stage 2 JSON schemas.
+   - Routes by block's valueType.
+   - Each schema section defines fields to extract.
 
 3. **Prompt Engineering**:
    - System message (anti-hallucination)
