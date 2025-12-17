@@ -1,0 +1,73 @@
+{
+    "stage": "stage1",
+    "sectionType": "eventsOfDefault",
+    "blocks": [
+      {
+        "blockId": "paymentDefaultPrincipal",
+        "label": "Payment Default – Principal",
+        "anchorPattern": "payment of any principal",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "paymentDefaultInterest",
+        "label": "Payment Default – Interest / Fees",
+        "anchorPattern": "payment of any interest|any Fee",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "misrepresentationDefault",
+        "label": "Misrepresentation",
+        "anchorPattern": "representation or warranty.*false or misleading",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "specifiedCovenantDefault",
+        "label": "Specified Covenant Default",
+        "anchorPattern": "Sections\\s+5\\.\\d+|Article\\s+VI",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "generalCovenantDefault",
+        "label": "General Covenant Default",
+        "anchorPattern": "any covenant.*Loan Document",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "crossDefault",
+        "label": "Cross Default",
+        "anchorPattern": "Indebtedness.*provided that",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "involuntaryBankruptcy",
+        "label": "Involuntary Bankruptcy",
+        "anchorPattern": "involuntary proceeding|petition.*bankruptcy",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "voluntaryBankruptcy",
+        "label": "Voluntary Bankruptcy",
+        "anchorPattern": "voluntarily commence|file any petition",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "judgmentDefault",
+        "label": "Judgment Default",
+        "anchorPattern": "judgments.*aggregate amount",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "changeInControl",
+        "label": "Change in Control",
+        "anchorPattern": "Change in Control",
+        "valueType": "eventOfDefault"
+      },
+      {
+        "blockId": "defaultRemedies",
+        "label": "Remedies Upon Event of Default",
+        "anchorPattern": "Administrative Agent may|Commitments shall automatically terminate",
+        "valueType": "defaultRemedy"
+      }
+    ]
+  }
+  

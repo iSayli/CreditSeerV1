@@ -1,0 +1,92 @@
+{
+    "stage": "stage2",
+    "sectionType": "credits",
+    "schemasByValueType": {
+        "fee": {
+            "feeRate": {
+                "extractionHint": {
+                "pattern": "(\\d+\\.\\d+%|\\d+%)",
+                "notes": "Extract the fee rate if stated as a percentage.",
+                "type": "quantitative_metric"
+                }
+            },
+            "feeBase": {
+                "extractionHint": {
+                "pattern": "(average daily unused amount|LC Exposure|Revolving Commitment)",
+                "notes": "Extract the base on which the fee is calculated.",
+                "type": "text"
+                }
+            },
+            "accrualPeriod": {
+                "extractionHint": {
+                "pattern": "(from and including|during the period)",
+                "notes": "Extract the accrual period language.",
+                "type": "text"
+                }
+            },
+            "paymentTiming": {
+                "extractionHint": {
+                "pattern": "(payable in arrears|payable on|on the Closing Date|on demand)",
+                "notes": "Extract when the fee is payable.",
+                "type": "text"
+                }
+            },
+            "exclusions": {
+                "extractionHint": {
+                "pattern": "Defaulting Lender",
+                "notes": "Extract any exclusions (e.g., Defaulting Lenders).",
+                "type": "text"
+                }
+            }
+        },
+        "interest": {
+            "baseRate": {
+                "extractionHint": {
+                "pattern": "(Alternate Base Rate|Adjusted LIBO Rate)",
+                "notes": "Extract the base rate used.",
+                "type": "text"
+                }
+            },
+            "marginReference": {
+                "extractionHint": {
+                "pattern": "Applicable Margin",
+                "notes": "Extract reference to Applicable Margin.",
+                "type": "text"
+                }
+            },
+            "interestRateFormula": {
+                "outputMode": "summarized",
+                "extractionHint": {
+                "pattern": "(shall bear interest|rate per annum)",
+                "notes": "Summarize how interest is calculated using only the block text.",
+                "type": "text"
+                }
+            },
+            "paymentTiming": {
+                "extractionHint": {
+                "pattern": "(Interest Payment Dates|payable in arrears|payable on demand)",
+                "notes": "Extract when interest is payable.",
+                "type": "text"
+                }
+            }
+        },
+        "interestMechanics": {
+            "fallbackTrigger": {
+                "extractionHint": {
+                "pattern": "(not generally available|unable to ascertain|reasonable means do not exist)",
+                "notes": "Extract conditions triggering alternate rate mechanics.",
+                "type": "text"
+                }
+            },
+            "fallbackEffect": {
+                "outputMode": "summarized",
+                "extractionHint": {
+                "pattern": "(shall be deemed|shall be a request for)",
+                "notes": "Summarize what happens once fallback is triggered.",
+                "type": "text"
+                }
+            }
+        }
+
+    }
+}

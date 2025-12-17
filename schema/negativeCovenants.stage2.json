@@ -1,0 +1,46 @@
+{
+    "stage": "stage2",
+    "sectionType": "negativeCovenants",
+    "schemasByValueType": {
+      "covenant": {
+        "operator": {
+          "isTarget": true,
+          "extractionHint": {
+            "pattern": "(shall not permit|shall not|permit|may not|must not|shall be at least|shall be no less than|shall be greater than|shall be less than|to be greater than|to be less than|to exceed|to fall below)",
+            "notes": "Extract the exact covenant direction/constraint language that governs how the metric is tested (e.g., 'shall not permit ... to be greater than', 'permit ... to exceed', 'shall be at least'). Prefer the clause that contains the operative restriction and the comparison phrase. Preserve wording as written",
+            "type": "text"
+          }
+        },
+
+        "thresholdValues": {
+          "isTarget": true,
+          "collectMultiple": true,
+          "extractionHint": {
+            "pattern": "last day of any Test Period",
+            "notes": "Extract all the threshold values that follow this phrase. If the covenant uses a table/schedule (e.g., 'set forth below'), extract every ratio/threshold listed in the schedule. If the covenant is static (single threshold like '... exceed 4.00:1.00'), extract that single threshold value. This could be a ratio (e.g., 4.50:1.00), percentage (e.g., 75%), or dollar amount. Return values exactly as written.",
+            "type": "quantitative_metric"
+          }
+        },
+
+        "dates": {
+          "isTarget": true,
+          "collectMultiple": true,
+          "extractionHint": {
+            "pattern": "(fiscal quarter ending|last day of any Test Period|as of the last day of any fiscal quarter|Test Period|last day of period)",
+            "notes": "Extract all the dates or test-period references associated with threshold values. For table-based covenants, extract the date labels for each row (e.g., 'June 30, 2013'). For static covenants with no calendar dates, extract the timing reference(s) that define when testing occurs (e.g., 'last day of any Test Period', 'as of the last day of any fiscal quarter'). Return exactly what appears.",
+            "type": "date"
+          }
+        },
+
+        "applicabilityCondition": {
+          "isTarget": true,
+          "extractionHint": {
+            "pattern": "(Notwithstanding|provided that|only if|if and only if|shall be in effect|shall only be in effect|so long as|to the extent that|when)",
+            "notes": "Extract any conditional 'gating' language that immediately follows this phrase. It determines when this covenant applies or is in effect. Extract the full conditional clause/sentence(s), including the triggering test and any values (e.g., '... only be in effect ... if aggregate amount of Letters of Credit and Loans outstanding exceed ... 30% ...'). Return exactly what appears.",
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+  

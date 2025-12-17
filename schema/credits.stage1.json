@@ -1,0 +1,69 @@
+{
+    "stage": "stage1",
+    "sectionType": "credits",
+    "blocks": [
+      {
+        "blockId": "feesGeneral",
+        "label": "Fees (General)",
+        "anchorPattern": "SECTION\\s+2\\.05\\.|Fees\\s*\\.",
+        "valueType": "fees"
+      },
+  
+      {
+        "blockId": "commitmentFee",
+        "label": "Commitment Fee",
+        "anchorPattern": "Commitment Fee",
+        "valueType": "fee"
+      },
+  
+      {
+        "blockId": "administrativeAgentFees",
+        "label": "Administrative Agent Fees",
+        "anchorPattern": "Administrative Agent Fees",
+        "valueType": "fee"
+      },
+  
+      {
+        "blockId": "lcFees",
+        "label": "LC and Fronting Fees",
+        "anchorPattern": "LC Participation Fee|Fronting Fee|LC and Fronting Fees",
+        "valueType": "fee"
+      },
+  
+      {
+        "blockId": "closingFees",
+        "label": "Closing / Upfront Fees",
+        "anchorPattern": "Closing Date upfront fees|Closing Fee|Upfront Fee",
+        "valueType": "fee"
+      },
+  
+      {
+        "blockId": "interestABR",
+        "label": "Interest – ABR Loans",
+        "anchorPattern": "ABR Borrowing|ABR Loans",
+        "valueType": "interest"
+      },
+  
+      {
+        "blockId": "interestEurodollar",
+        "label": "Interest – Eurodollar Loans",
+        "anchorPattern": "Eurodollar Borrowing|Eurodollar Loans",
+        "valueType": "interest"
+      },
+  
+      {
+        "blockId": "defaultInterest",
+        "label": "Default Interest",
+        "anchorPattern": "Default Interest|Default Rate",
+        "valueType": "interest"
+      },
+  
+      {
+        "blockId": "alternateRateMechanics",
+        "label": "Alternate Rate of Interest",
+        "anchorPattern": "Alternate Rate of Interest",
+        "valueType": "interestMechanics"
+      }
+    ]
+  }
+  

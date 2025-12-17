@@ -1,0 +1,37 @@
+{
+    "stage": "stage1",
+    "sectionType": "negativeCovenants",
+    "blockTemplates": [
+      {
+        "blockId": "totalLeverageRatio",
+        "label": "Total Leverage Ratio",
+        "valueType": "covenant",
+        "anchorPattern": "(Leverage Ratio|Total Leverage Ratio|Consolidated Total Leverage Ratio)"
+      },
+      {
+        "blockId": "interestCoverageRatio",
+        "label": "Interest Coverage Ratio",
+        "valueType": "covenant",
+        "anchorPattern": "(Interest Coverage Ratio|Consolidated Interest Coverage Ratio)"
+      },
+      {
+        "blockId": "fixedChargeCoverageRatio",
+        "label": "Fixed Charge Coverage Ratio",
+        "anchorPattern": "(Fixed Charge Coverage Ratio|Consolidated Fixed Charge Coverage Ratio)",
+        "valueType": "covenant"
+    },
+      {
+        "blockId": "maximumConsolidatedTotalLeverageRatio",
+        "label": "Maximum Consolidated Total Leverage Ratio",
+        "valueType": "covenant",
+        "anchorPattern": "(Maximum Consolidated Total Leverage Ratio|Maxiumum Consolidated Leverage Ratio)"
+      },
+      {
+        "blockId": "minimumLiquidity",
+        "label": "Minimum Liquidity",
+        "anchorPattern": "(Minimum Liquidity)",
+        "valueType": "covenant"
+      }
+    ]
+}
+  

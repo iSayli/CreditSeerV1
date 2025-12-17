@@ -1,0 +1,86 @@
+{
+    "stage": "stage2",
+    "sectionType": "eventsOfDefault",
+    "schemasByValueType": {
+      "eventOfDefault": {
+        "defaultCategory": {
+          "extractionHint": {
+            "notes": "Classify the default based on the block content (e.g., Payment Default, Covenant Default, Bankruptcy, Cross-Default, Judgment, Change in Control).",
+            "type": "text"
+          }
+        },
+  
+        "affectedObligation": {
+          "extractionHint": {
+            "notes": "Extract what obligation, covenant, or liability is breached (e.g., principal, interest, covenants, Indebtedness).",
+            "type": "text"
+          }
+        },
+  
+        "gracePeriod": {
+          "extractionHint": {
+            "pattern": "(Business Days|days)",
+            "notes": "Extract any grace or cure period (e.g., 'five Business Days', '30 days'). If none, return Not Found.",
+            "type": "duration"
+          }
+        },
+  
+        "noticeRequired": {
+          "extractionHint": {
+            "pattern": "written notice|notice thereof",
+            "notes": "Extract any notice requirement prior to default becoming effective.",
+            "type": "text"
+          }
+        },
+  
+        "monetaryThreshold": {
+          "extractionHint": {
+            "pattern": "\\$",
+            "notes": "Extract any dollar threshold required for the default to apply (e.g., '$20.0 million', '$50,000,000').",
+            "type": "quantitative_metric"
+          }
+        },
+  
+        "exceptions": {
+          "extractionHint": {
+            "pattern": "provided that|provided, further|except",
+            "notes": "Extract carve-outs, exclusions, or limiting conditions that prevent the default from triggering.",
+            "type": "text"
+          }
+        },
+  
+        "automaticDefault": {
+          "extractionHint": {
+            "notes": "Determine whether the default applies automatically (e.g., bankruptcy events) or only after notice/grace. Output 'Yes', 'No', or 'Not Found'.",
+            "type": "boolean"
+          }
+        }
+      },
+  
+      "defaultRemedy": {
+        "lenderActions": {
+          "extractionHint": {
+            "notes": "Extract lender remedies such as termination of commitments or acceleration of loans.",
+            "type": "text"
+          }
+        },
+  
+        "automaticAcceleration": {
+          "extractionHint": {
+            "pattern": "automatically become due",
+            "notes": "Extract whether acceleration is automatic or discretionary.",
+            "type": "boolean"
+          }
+        },
+  
+        "noticeWaiver": {
+          "extractionHint": {
+            "pattern": "without presentment|without demand",
+            "notes": "Extract any waiver of notice, demand, or protest.",
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+  

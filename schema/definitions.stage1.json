@@ -1,0 +1,63 @@
+{
+    "stage": "stage1",
+    "sectionType": "definitions",
+    "blocks": [
+      {
+        "blockId": "maturityDate",
+        "label": "Maturity Date",
+        "anchorPattern": "\"Maturity Date\"\\s+(shall mean|means)",
+        "valueType": "date"
+      },
+      {
+        "blockId": "revolvingMaturityDate",
+        "label": "Revolving Maturity Date",
+        "anchorPattern": "\"Revolving Maturity Date\"\\s+(shall mean|means)",
+        "valueType": "date"
+      },
+      {
+        "blockId": "revolvingCreditCommitment",
+        "label": "Revolving Credit Commitment",
+        "anchorPattern": "\"Revolving Credit Commitment\"\\s+(shall mean|means)|\"Revolving Commitment\"\\s+(shall mean|means)",
+        "valueType": "commitment"
+      },
+      {
+        "blockId": "LCCommitment",
+        "label": "LC Commitment",
+        "anchorPattern": "\"LC Commitment\"\\s+(shall mean|means)|\"Letters of Credit Commitment\"\\s+(shall mean|means)",
+        "valueType": "commitment"
+      },
+      {
+        "blockId": "termLoanCommitment",
+        "label": "Term Loan Commitment",
+        "anchorPattern": "\"Term Loan Commitment\"\\s+(shall mean|means)|\"Initial Term Loan Commitment\"\\s+(shall mean|means)",
+        "valueType": "commitment"
+      },
+      {
+        "blockId": "ddtlCommitment",
+        "label": "DDTL Commitment",
+        "anchorPattern": "\"DDTL Commitment\"\\s+(shall mean|means)|\"Delayed Draw Term Loans Commitment\"\\s+(shall mean|means)",
+        "valueType": "commitment"
+      },
+  
+      {
+        "blockId": "abr",
+        "label": "Alternate Base Rate / ABR",
+        "anchorPattern": "\"Alternate Base Rate\"\\s+(shall mean|means)|\"ABR\"\\s+(shall mean|means)",
+        "valueType": "rate"
+      },
+      {
+        "blockId": "adjustedLiboRate",
+        "label": "Adjusted Libo Rate",
+        "anchorPattern": "\"Adjusted Libo Rate\"\\s+(shall mean|means)",
+        "valueType": "rate"
+      },
+  
+      {
+        "blockId": "applicableMargin",
+        "label": "Applicable Margin",
+        "anchorPattern": "\"Applicable Margin\"\\s+(shall mean|means)",
+        "valueType": "margin"
+      }
+    ]
+  }
+  

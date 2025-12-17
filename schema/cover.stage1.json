@@ -1,0 +1,75 @@
+{
+    "stage": "stage1",
+    "sectionType": "coverPage",
+    "targets": [
+      {
+        "fieldId": "agreementTitle",
+        "anchorPattern": "(CREDIT AGREEMENT|REVOLVING LOAN CREDIT AGREEMENT|TERM LOAN CREDIT AGREEMENT|SYNDICATED FACILITY AGREEMENT)",
+        "notes": "Usually the most prominent text on the first page.",
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "effectiveDate",
+        "anchorPattern": "dated as of",
+        "notes": "The date immediately follows the anchorPattern",
+        "valueType": "date"
+      },
+      {
+        "fieldId": "borrowers",
+        "anchorPattern": "as Borrower",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "holdings",
+        "anchorPattern": "as Holdings",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "guarantors",
+        "anchorPattern": "as Guarantors",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "administrativeAgent",
+        "anchorPattern": "as Administrative Agent|as Co-Administrative Agent|as Joint Lead Arranger, Joint Bookrunner, Joint Syndication Agent and Administrative Agent",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "leadArrangers",
+        "anchorPattern": "(as Lead Arrangers|as Joint Lead Arrangers and Bookrunners|as Joint Bookrunners and Joint Lead Arrangers)",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "syndicationAgents",
+        "anchorPattern": "as Syndication Agents|as Joint Syndication Agents",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "documentationAgents",
+        "anchorPattern": "as Documentation Agents",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      },
+      {
+        "fieldId": "collateralAgent",
+        "anchorPattern": "as Collateral Agent",
+        "notes": "The name of the entity immediately precedes the anchorPattern",
+        "collectMultiple": true,
+        "valueType": "named_entity"
+      }
+    ]
+  }
+  

@@ -1,0 +1,71 @@
+{
+    "stage": "stage2",
+    "sectionType": "definitions",
+    "schemasByValueType": {
+  
+      "date": {
+        "dateValue": {
+          "extractionHint": {
+            "pattern": "(shall mean|means)",
+            "notes": "Extract the date or date expression following this phrase. May be a concrete date or a relative expression (e.g., '364 days after the Closing Date').",
+            "type": "date"
+          }
+        }
+      },
+  
+      "commitment": {
+        "commitmentAmount": {
+          "extractionHint": {
+            "pattern": "(aggregate amount of .*Commitments is|aggregate amount of the .*Commitments is|aggregate amount of .*Commitment is|aggregate amount of the .*Commitment is)",
+            "notes": "Extract the monetary commitment amount stated in the definition.",
+            "type": "quantitative_metric"
+          }
+        },
+        "referenceSections": {
+          "collectMultiple": true,
+          "extractionHint": {
+            "pattern": "(Section\\s+[0-9A-Za-z\\.()]+|Schedule\\s+[0-9A-Za-z\\.()]+|Appendix\\s+[A-Za-z]+)",
+            "notes": "Extract all section, schedule, or appendix references appearing in the definition.",
+            "type": "location"
+          }
+        }
+      },
+  
+      "rate": {
+        "rateDefinition": {
+          "outputMode": "summarized",
+          "extractionHint": {
+            "pattern": "(shall mean|means)",
+            "notes": "Extract the rate definition text from the block after this phrase (often a formula or multi-part calculation). Return exactly what appears.",
+            "type": "text"
+          }
+        }
+      },
+  
+      "margin": {
+        "abrMargin": {
+          "extractionHint": {
+            "pattern": "with respect to any ABR Loan",
+            "notes": "Extract the margin applicable to ABR Loans.",
+            "type": "quantitative_metric"
+          }
+        },
+        "eurodollarMargin": {
+          "extractionHint": {
+            "pattern": "with respect to any Eurodollar Loan",
+            "notes": "Extract the margin applicable to Eurodollar Loans.",
+            "type": "quantitative_metric"
+          }
+        },
+        "sofrMargin": {
+          "extractionHint": {
+            "pattern": "with respect to any SOFR Loan",
+            "notes": "Extract the margin applicable to SOFR Loans.",
+            "type": "quantitative_metric"
+          }
+        }
+      }
+  
+    }
+}
+  
