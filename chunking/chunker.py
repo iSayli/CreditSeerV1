@@ -345,8 +345,16 @@ def classify_chunk_type(article_title: str) -> str:
         return 'negative_covenants'
     elif 'COVER' in title_upper or title_upper == 'COVER PAGE':
         return 'cover'
+    elif 'CONDITION' in title_upper or 'CONDITIONS' in title_upper:
+        # "Conditions to Credit Extensions" should not be classified as credits
+        return 'other'
     elif 'CREDIT' in title_upper:
-        return 'credits'
+        # Check for common credit article patterns
+        # "THE CREDITS", "CREDITS", "CREDIT FACILITIES", etc.
+        if any(pattern in title_upper for pattern in ['THE CREDITS', 'CREDITS', 'CREDIT FACILITIES', 'CREDIT FACILITY']):
+            return 'credits'
+        # If it just has "CREDIT" but doesn't match specific patterns, be conservative
+        return 'other'
     elif 'EVENT' in title_upper and 'DEFAULT' in title_upper:
         return 'events_of_default'
     else:
