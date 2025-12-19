@@ -14,6 +14,9 @@ class Stage2Extractor:
         if not api_key:
             raise ValueError("OPENAI_API_KEY not found in environment variables")
         
+        # Initialize standard OpenAI client.
+        # The proxy issue was likely due to a version mismatch or internal bug in older openai versions.
+        # We've upgraded openai to fix this.
         self.client = OpenAI(api_key=api_key)
         self.model = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
     

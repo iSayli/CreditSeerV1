@@ -5,9 +5,10 @@
   
       "date": {
         "dateValue": {
+          "collectMultiple": true,
           "extractionHint": {
             "pattern": "(shall mean|means|with respect to)",
-            "notes": "Extract the date or date expression following this phrase. May be a concrete date or a relative expression (e.g., '364 days after the Closing Date').",
+            "notes": "Extract all the dates or date expressions following these phrases. May be a concrete date or a relative expression (e.g., '364 days after the Closing Date').",
             "type": "date"
           }
         }
