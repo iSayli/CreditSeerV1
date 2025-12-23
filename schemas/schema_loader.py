@@ -19,6 +19,7 @@ class SchemaLoader:
     
     STAGE2_MAPPING = {
         'definitions': 'definitions.stage2.json',
+        'representations': 'representations.stage2.json',
         'negative_covenants': 'negativeCovenants.stage2.json',
         'credits': 'credits.stage2.json',
         'events_of_default': 'eventsOfDefault.stage2.json',

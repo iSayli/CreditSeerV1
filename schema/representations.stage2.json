@@ -1,0 +1,16 @@
+{
+    "stage": "stage2",
+    "sectionType": "representations",
+    "schemasByValueType": {
+      "representation": {
+        "useOfProceeds": {
+          "outputMode": "summarized",
+          "extractionHint": {
+            "notes": "Summarize how the loan proceeads may be used (e.g., working capital, general corporate purposes, refinancing existing debt). Use only information explicitly stated in the block.",
+            "type": "text"
+          }
+        }
+      }
+    }
+}
+  

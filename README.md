@@ -50,7 +50,7 @@ mkdir uploads
 python app.py
 ```
 
-The backend will run on `http://localhost:5000`
+The backend will run on `http://localhost:5001` (defaults to 5001 as port 5000 is often used by AirPlay on macOS)
 
 2. Open the frontend:
 Open `frontend/index.html` in your web browser, or serve it using a simple HTTP server:

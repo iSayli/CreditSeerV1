@@ -56,6 +56,7 @@
                 }
             },
             "interestRateFormula": {
+                "collectMultiple": true,
                 "outputMode": "summarized",
                 "extractionHint": {
                 "pattern": "(shall bear interest|rate per annum)",

@@ -4,7 +4,6 @@
     "schemasByValueType": {
       "covenant": {
         "operator": {
-          "isTarget": true,
           "extractionHint": {
             "pattern": "(shall not permit|shall not|permit|may not|must not|shall be at least|shall be no less than|shall be greater than|shall be less than|to be greater than|to be less than|to exceed|to fall below)",
             "notes": "Extract the exact covenant direction/constraint language that governs how the metric is tested (e.g., 'shall not permit ... to be greater than', 'permit ... to exceed', 'shall be at least'). Prefer the clause that contains the operative restriction and the comparison phrase. Preserve wording as written",
@@ -13,7 +12,6 @@
         },
 
         "thresholdValues": {
-          "isTarget": true,
           "collectMultiple": true,
           "extractionHint": {
             "pattern": "last day of any Test Period",
@@ -23,7 +21,6 @@
         },
 
         "dates": {
-          "isTarget": true,
           "collectMultiple": true,
           "extractionHint": {
             "pattern": "(fiscal quarter ending|last day of any Test Period|as of the last day of any fiscal quarter|Test Period|last day of period)",
@@ -33,7 +30,6 @@
         },
 
         "applicabilityCondition": {
-          "isTarget": true,
           "extractionHint": {
             "pattern": "(Notwithstanding|provided that|only if|if and only if|shall be in effect|shall only be in effect|so long as|to the extent that|when)",
             "notes": "Extract any conditional 'gating' language that immediately follows this phrase. It determines when this covenant applies or is in effect. Extract the full conditional clause/sentence(s), including the triggering test and any values (e.g., '... only be in effect ... if aggregate amount of Letters of Credit and Loans outstanding exceed ... 30% ...'). Return exactly what appears.",

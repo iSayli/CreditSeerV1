@@ -1,13 +1,13 @@
 {
-    "stage": "stage1",
-    "sectionType": "representations",
-    "blocks": [
-      {
-        "blockId": "useOfProceeds",
-        "label": "Use of Proceeds",
-        "anchorPattern": "(Use of Proceeds:|Borrower will use the proceeds|The proceeds of the Revolving Loans will be used)",
-        "valueType": "representation"
-      }
-    ]
-  }
+  "stage": "stage1",
+  "sectionType": "representations",
+  "blocks": [
+    {
+      "blockId": "useOfProceeds",
+      "label": "Use of Proceeds",
+      "anchorPattern": "(Use of Proceeds:|Borrower will use the proceeds|The proceeds of the Revolving Loans will be used)",
+      "valueType": "representation"
+    }
+  ]
+}
   

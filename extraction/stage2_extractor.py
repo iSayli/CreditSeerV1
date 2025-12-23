@@ -6,6 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Constants
+ANCHOR_PROXIMITY_THRESHOLD = 500  # Maximum distance (chars) from anchor pattern for full proximity score
+ANCHOR_VERY_CLOSE_THRESHOLD = 100  # Distance considered "very close" to anchor
+ANCHOR_CLOSE_THRESHOLD = 250  # Distance considered "close" to anchor
+
 class Stage2Extractor:
     """Stage 2: Extract structured values from Stage 1 blocks"""
     
@@ -14,9 +19,7 @@ class Stage2Extractor:
         if not api_key:
             raise ValueError("OPENAI_API_KEY not found in environment variables")
         
-        # Initialize standard OpenAI client.
-        # The proxy issue was likely due to a version mismatch or internal bug in older openai versions.
-        # We've upgraded openai to fix this.
+        # Initialize OpenAI client
         self.client = OpenAI(api_key=api_key)
         self.model = os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
     
@@ -55,7 +58,7 @@ class Stage2Extractor:
             }
         
         # Build prompt
-        prompt = self._build_prompt(block_id, block_text, value_type, value_type_schema, schema)
+        prompt = self._build_prompt(block_id, block_text, value_type, value_type_schema)
         
         # Call LLM
         response = self.client.chat.completions.create(
@@ -85,7 +88,7 @@ class Stage2Extractor:
             return schema['schemasByValueType'].get(value_type, {})
         return {}
     
-    def _build_prompt(self, block_id: str, block_text: str, value_type: str, value_type_schema: Dict, full_schema: Dict) -> str:
+    def _build_prompt(self, block_id: str, block_text: str, value_type: str, value_type_schema: Dict) -> str:
         """Build Stage 2 extraction prompt"""
         schema_str = self._format_schema_for_prompt(value_type_schema)
         
@@ -762,14 +765,13 @@ BEGIN STAGE 2 EXTRACTION
             # Calculate minimum distance to any anchor
             min_distance = min(abs(value_pos - anchor_pos) for anchor_pos in anchor_positions)
             
-            # Score based on proximity: within 500 chars = full score, degrades linearly
-            proximity_threshold = 500
-            if min_distance <= proximity_threshold:
+            # Score based on proximity: within threshold = full score, degrades linearly
+            if min_distance <= ANCHOR_PROXIMITY_THRESHOLD:
                 # Linear decay from 1.0 to 0.0
-                score = max(0, 1.0 - (min_distance / proximity_threshold))
-                if min_distance <= 100:
+                score = max(0, 1.0 - (min_distance / ANCHOR_PROXIMITY_THRESHOLD))
+                if min_distance <= ANCHOR_VERY_CLOSE_THRESHOLD:
                     status = f'Very close to anchor ({min_distance} chars)'
-                elif min_distance <= 250:
+                elif min_distance <= ANCHOR_CLOSE_THRESHOLD:
                     status = f'Close to anchor ({min_distance} chars)'
                 else:
                     status = f'Moderate distance from anchor ({min_distance} chars)'

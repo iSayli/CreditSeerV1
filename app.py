@@ -4,7 +4,6 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 import uuid
-import json
 
 from pdf_processing.processor import PDFProcessor
 from chunking.chunker import DocumentChunker
@@ -25,8 +24,12 @@ UPLOAD_CLEANUP_AGE_HOURS = 1  # Clean up files older than 1 hour
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-def cleanup_old_uploads():
-    """Remove uploaded files older than UPLOAD_CLEANUP_AGE_HOURS"""
+def cleanup_old_uploads() -> int:
+    """Remove uploaded files older than UPLOAD_CLEANUP_AGE_HOURS
+    
+    Returns:
+        int: Number of files deleted
+    """
     try:
         current_time = time.time()
         cutoff_time = current_time - (UPLOAD_CLEANUP_AGE_HOURS * 3600)
@@ -46,11 +49,13 @@ def cleanup_old_uploads():
                         deleted_count += 1
             except Exception as e:
                 # Skip files that can't be deleted
+                # In production, log the error: logger.warning(f"Could not delete {filepath}: {e}")
                 continue
         
         return deleted_count
     except Exception as e:
         # Don't fail if cleanup fails
+        # In production, log the error: logger.error(f"Cleanup failed: {e}")
         return 0
 
 # Global state (in production, use a proper database)
@@ -62,13 +67,24 @@ app_state = {
     'stage2_results': {}
 }
 
-def allowed_file(filename):
+def allowed_file(filename: str) -> bool:
+    """Check if file extension is allowed"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
     """Serve frontend"""
     return send_from_directory('frontend', 'index.html')
+
+@app.route('/styles.css')
+def styles():
+    """Serve CSS file"""
+    return send_from_directory('frontend', 'styles.css')
+
+@app.route('/CreditSeerLogo.svg')
+def logo():
+    """Serve logo SVG file"""
+    return send_from_directory('frontend', 'CreditSeerLogo.svg')
 
 @app.route('/api/health', methods=['GET'])
 def health():
@@ -104,14 +120,14 @@ def reset_state():
 def upload_file():
     """Upload PDF file"""
     if 'file' not in request.files:
-        return jsonify({'error': 'No file provided'}), 400
+        return jsonify({'status': 'error', 'error': 'No file provided'}), 400
     
     file = request.files['file']
     if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
+        return jsonify({'status': 'error', 'error': 'No file selected'}), 400
     
     if not allowed_file(file.filename):
-        return jsonify({'error': 'Invalid file type. Only PDF files are allowed.'}), 400
+        return jsonify({'status': 'error', 'error': 'Invalid file type. Only PDF files are allowed.'}), 400
     
     # Clean up old uploads before saving new one
     deleted_count = cleanup_old_uploads()
@@ -155,7 +171,7 @@ def upload_file():
 def process_pdf():
     """Process PDF to extract text"""
     if not app_state['uploaded_file']:
-        return jsonify({'error': 'No file uploaded'}), 400
+        return jsonify({'status': 'error', 'error': 'No file uploaded'}), 400
     
     try:
         processor = PDFProcessor()
@@ -169,15 +185,19 @@ def process_pdf():
             'metadata': result['metadata']
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': 'error', 'error': str(e)}), 500
 
 @app.route('/api/chunk', methods=['POST'])
 def chunk_document():
     """Chunk document into articles"""
     if not app_state['extracted_text']:
-        return jsonify({'error': 'PDF not processed yet'}), 400
+        return jsonify({'status': 'error', 'error': 'PDF not processed yet'}), 400
     
     try:
+        # Validate extracted_text structure
+        if not isinstance(app_state['extracted_text'], dict) or 'text' not in app_state['extracted_text']:
+            return jsonify({'status': 'error', 'error': 'Invalid extracted text structure'}), 500
+        
         chunker = DocumentChunker()
         chunks = chunker.chunk(app_state['extracted_text']['text'])
         
@@ -188,13 +208,13 @@ def chunk_document():
             'chunks': chunks
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': 'error', 'error': str(e)}), 500
 
 @app.route('/api/stage1', methods=['POST'])
 def run_stage1():
     """Run Stage 1 extraction on all chunks"""
     if not app_state['chunks']:
-        return jsonify({'error': 'Document not chunked yet'}), 400
+        return jsonify({'status': 'error', 'error': 'Document not chunked yet'}), 400
     
     try:
         extractor = Stage1Extractor()
@@ -229,13 +249,13 @@ def run_stage1():
             'results': stage1_results
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': 'error', 'error': str(e)}), 500
 
 @app.route('/api/stage2', methods=['POST'])
 def run_stage2():
     """Run Stage 2 extraction on Stage 1 blocks"""
     if not app_state['stage1_results']:
-        return jsonify({'error': 'Stage 1 not run yet'}), 400
+        return jsonify({'status': 'error', 'error': 'Stage 1 not run yet'}), 400
     
     try:
         extractor = Stage2Extractor()
@@ -312,7 +332,7 @@ def run_stage2():
             'results': stage2_results
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': 'error', 'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Validate environment
@@ -325,6 +345,7 @@ if __name__ == '__main__':
     if deleted_count > 0:
         print(f"Cleaned up {deleted_count} old uploaded file(s) on startup")
     
+    # Default to 5001 as port 5000 is often used by AirPlay on macOS
     port = int(os.getenv('FLASK_PORT', 5001))
     print(f"\n{'='*60}")
     print(f"CreditSeer is starting on http://localhost:{port}")

@@ -17,6 +17,10 @@ import re
 import uuid
 from typing import Dict, List, Any, Optional, Tuple
 
+# Constants
+ARTICLE_SEARCH_OFFSET = 100  # Offset to avoid matching same article header multiple times
+MIN_COVER_TEXT_LENGTH = 100  # Minimum length for cover page text to be considered valid
+
 
 def find_table_of_contents(text: str) -> Optional[Tuple[int, int]]:
     """
@@ -415,7 +419,7 @@ class DocumentChunker:
                     'article_title': article_title
                 })
                 # Next search starts after this article
-                search_start = article_start_idx + 100  # Small offset to avoid matching same article
+                search_start = article_start_idx + ARTICLE_SEARCH_OFFSET
         
         if not article_positions:
             # Fallback if we can't find articles
@@ -426,7 +430,7 @@ class DocumentChunker:
         first_article_pos = article_positions[0]['text_start_idx']
         cover_text = text[:first_article_pos].strip()
         
-        if cover_text and len(cover_text) > 100:
+        if cover_text and len(cover_text) > MIN_COVER_TEXT_LENGTH:
             cover_start_page = get_page_for_position(text, 0)
             cover_end_page = get_page_for_position(text, first_article_pos - 1)
             

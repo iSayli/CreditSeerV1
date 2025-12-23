@@ -38,8 +38,9 @@ mkdir -p uploads
 
 # Start Flask server
 echo ""
-echo "Starting Flask server on http://localhost:5000"
-echo "Open http://localhost:5000 in your browser to access CreditSeer"
+export FLASK_PORT=${FLASK_PORT:-5001}
+echo "Starting Flask server on http://localhost:${FLASK_PORT}"
+echo "Open http://localhost:${FLASK_PORT} in your browser to access CreditSeer"
 echo ""
 python app.py
 

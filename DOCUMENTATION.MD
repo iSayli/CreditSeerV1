@@ -1199,6 +1199,7 @@ CreditSeerV1/
 
 **Stage 2 Schemas:**
 - `definitions.stage2.json` - Definition value extraction (uses `schemasByValueType`)
+- `representations.stage2.json` - Representation value extraction
 - `negativeCovenants.stage2.json` - Covenant value extraction
 - `credits.stage2.json` - Credit facility value extraction
 - `eventsOfDefault.stage2.json` - Default event value extraction
@@ -1523,25 +1524,479 @@ index.html (single-page application)
 
 ---
 
+## Dashboard Features
+
+### Overview
+
+The CreditSeer dashboard is a comprehensive single-page application that displays extracted credit agreement data with interactive features for analysts to review, verify, and correct extracted values. The dashboard is divided into two main panels: the **Main Dashboard** (70% width) showing extracted data, and the **Value Details Panel** (30% width) for detailed value inspection and editing.
+
+### Dashboard Layout
+
+**Two-Panel Design:**
+- **Main Dashboard (70%)**: Displays all extracted data organized by sections
+- **Value Details Panel (30%)**: Shows detailed information about selected values with document viewer
+
+### Main Dashboard Sections
+
+#### 1. Header Section
+- **Agreement Title** (clickable)
+- **Borrowers** (clickable)
+- **Administrative Agent** (clickable)
+- **Effective Date** (clickable)
+- All values link to source text in document viewer
+
+#### 2. Facility Overview Section
+- **Commitment Cards**: Shows different credit facilities
+  - Revolving Credit Facility amount
+  - Term Loan Facility amount
+  - Each with reference sections
+- **Maturity Date**: When the facility matures
+- **Use of Proceeds**: How loan proceeds may be used
+- **Payment Default Principal Note**: Shows grace period with link to Events of Default
+
+#### 3. Pricing Overview Section
+Displays three pricing cards:
+
+**ABR Loan Card:**
+- Interest Formula (e.g., "ABR + 2.50%")
+- ABR Margin (specific margin value)
+- Payment Timing (e.g., "Quarterly in arrears")
+
+**Eurodollar Loan Card:**
+- Interest Formula (e.g., "LIBOR + 2.75%")
+- Eurodollar Margin (specific margin value)
+- Payment Timing
+
+**Default Interest Card:**
+- Interest formula for default scenarios
+- Margin Reference (e.g., "Applicable Margin")
+- Payment Timing
+
+**Payment Default Interest Note**: Shows grace period with link to Events of Default
+
+#### 4. Fees Table
+Displays tabular data:
+- **Fee Type**: Commitment Fee, Letter of Credit Fee, etc.
+- **Accrual Period**: Daily, Monthly, etc.
+- **Exclusions**: Any excluded parties or conditions
+- **Fee Base**: What the fee is calculated on
+- **Fee Rate**: Percentage or rate
+- **Payment**: When fees are payable
+- Contextual notes linking to Events of Default (if applicable)
+
+#### 5. Negative Covenants Section
+Displays covenant cards with:
+- **Covenant Title**: e.g., "Leverage Ratio"
+- **Operator**: e.g., "shall not exceed"
+- **Threshold Values**: Multiple threshold/date pairs
+  - Threshold value (e.g., "4.00:1.00")
+  - Associated date (e.g., "December 31, 2024")
+- **Condition**: What the covenant tests (e.g., "Total Debt to EBITDA")
+- **General Covenant Default Note**: Shows grace period at section end with link to Events of Default
+
+#### 6. Events of Default Section
+Displays comprehensive table:
+- **Triggered By**: What causes the default
+- **Default Type**: Payment Default, Covenant Default, etc.
+- **Affected Obligation**: What obligations are affected
+- **Automatic?**: Yes/No - whether default is automatic
+- **Category**: Classification of the default
+- **Grace Period**: Time before default takes effect
+- **Monetary Threshold**: Dollar amount threshold (if applicable)
+- **Notice Required**: Whether notice is needed
+
+### Value Details Panel
+
+The Value Details Panel appears when users click any extracted value. It consists of three expandable sections:
+
+#### 1. More Details Section (~40% of panel)
+
+**Features:**
+- **Value Label**: Shows field name (e.g., "Commitment Amount")
+- **Value Descriptor**: Contextual description of what the value represents
+- **Value Display**: Current value (overridden value if exists, otherwise original)
+- **Modify Button**: Opens modification modal
+- **Revert Button**: Only shown when value has been overridden
+- **Modification History**: Shows who modified, when, and notes (if overridden)
+
+**Modification Modal:**
+- Value input (editable)
+- Reason dropdown (required):
+  - "Incorrect value extracted" - requires correct source block text
+  - "Correct Value was extracted but needs refinement"
+  - "Correct Value was extracted. Context-specific adjustment"
+- Modification notes (optional)
+- Save/Cancel buttons
+
+#### 2. View Document Section (~60% of panel)
+
+**Features:**
+- **Chunk Navigation**: Dropdown menu listing all document chunks
+- **Document Text Display**: Full extracted text organized by chunks
+- **Click-to-Highlight System**: Automatically highlights source text when value is clicked
+  - Uses first 100 characters as search anchor
+  - Normalizes whitespace for matching
+  - Case-insensitive fallback
+  - Smooth scroll to highlighted text
+
+**Highlighting Behavior:**
+- **No Override**: Normal highlighting using original block text
+- **Override Reason = "refinement"**: Normal highlighting (value is correct, just needs formatting)
+- **Override Reason = "incorrect"**: Uses `sourceBlockText` for highlighting (if provided)
+- **Override Reason = "context"**: Highlighting disabled (context may differ)
+
+#### 3. Analyst Notes Section (collapsible)
+
+**Features:**
+- **Notes Textarea**: Auto-saves 500ms after user stops typing (debounced)
+- **Clear Button**: Removes notes
+- **Sticky Note Icon**: Appears next to clickable value in dashboard when notes exist
+- **Persistence**: Saved in `appState.analystNotes[blockId]`
+
+### Override System
+
+**Purpose**: Allows analysts to correct or refine extracted values with full audit trail.
+
+**Override Data Structure:**
+```javascript
+{
+    originalValue: "Original extracted value",
+    overriddenValue: "Analyst's corrected value",
+    reason: "incorrect" | "refinement" | "context",
+    notes: "Analyst's notes/explanation",
+    sourceBlockText: "Correct source text (if reason=incorrect)",
+    overrideDate: "2024-01-15T10:30:00Z",
+    overrideBy: "Analyst"
+}
+```
+
+**Override Display:**
+- Overridden values show "Analyst-adjusted" badge in dashboard
+- Modification history visible in Value Details panel
+- Can revert overrides to restore original value
+
+### Interactive Features
+
+1. **Clickable Values**: Every extracted value is clickable and opens Value Details panel
+2. **Override Badges**: Shows "Analyst-adjusted" badge on overridden values
+3. **Contextual Notes**: Links between sections (e.g., Fees → Events of Default)
+4. **Sample Data Mode**: Preview dashboard without uploading a document
+
+---
+
+## Understanding BlockId
+
+### Overview
+
+`blockId` is a **unique identifier** that connects three stages of the extraction pipeline:
+1. **Stage 1**: Block discovery (finds text blocks in the document)
+2. **Stage 2**: Value extraction (extracts structured data from blocks)
+3. **Frontend**: Display and navigation (maps values back to original text)
+
+Think of `blockId` as a **"bookmark"** that lets you trace any extracted value back to its original location in the PDF.
+
+### The Two-Stage Extraction Flow
+
+#### Stage 1: Block Discovery
+
+**Purpose**: Find and isolate relevant text blocks from the document
+
+**How it works**:
+1. The system loads a **Stage 1 schema** (e.g., `definitions.stage1.json`)
+2. Each schema defines **blocks to find** with:
+   - `blockId`: Unique identifier (e.g., `"revolvingCreditCommitment"`)
+   - `anchorPattern`: Pattern to locate the block (e.g., `"Revolving Credit Commitment" shall mean`)
+   - `valueType`: Category of the block (e.g., `"commitment"`, `"covenant"`, `"date"`)
+   - `label`: Human-readable name
+
+3. The LLM searches the document chunk and extracts **verbatim text blocks**
+
+**Stage 1 Output:**
+```json
+{
+  "blockId": "revolvingCreditCommitment",
+  "valueType": "commitment",
+  "text": "\"Revolving Credit Commitment\" shall mean the aggregate amount..."
+}
+```
+
+#### Stage 2: Value Extraction
+
+**Purpose**: Extract structured values from the blocks found in Stage 1
+
+**How it works**:
+1. For each block from Stage 1, the system:
+   - Takes the `blockId` and `valueType` from Stage 1
+   - Loads the **Stage 2 schema** section matching the `valueType`
+   - Sends the block text to the LLM with field extraction instructions
+
+2. The LLM extracts specific fields (e.g., `commitmentAmount`, `referenceSections`)
+
+**Stage 2 Output:**
+```json
+{
+  "blockId": "revolvingCreditCommitment",  // ← Same blockId from Stage 1!
+  "valueType": "commitment",
+  "values": {
+    "commitmentAmount": "$500,000,000",
+    "referenceSections": ["Section 2.01"]
+  },
+  "confidence": { ... }
+}
+```
+
+**Key Point**: The `blockId` is **preserved** from Stage 1 to Stage 2, creating a link between the extracted values and the original block text.
+
+### How BlockId Enables Click-to-Highlight
+
+#### Frontend Mapping
+
+When the frontend receives Stage 1 and Stage 2 results, it builds mappings:
+
+1. **`blockIdToText`**: Maps blockId → original block text
+2. **`fieldToBlockId`**: Maps field names → blockId (for quick lookup)
+
+#### Clickable Values
+
+When displaying extracted values, the frontend creates clickable spans with the `blockId` as the identifier.
+
+#### Highlighting Process
+
+When a user clicks a value:
+1. The `blockId` is passed to `highlightBlock(blockId)`
+2. The function looks up the block text: `appState.blockIdToText[blockId]`
+3. It searches for that text in the PDF viewer
+4. It highlights and scrolls to the matching location
+
+### BlockId Naming Conventions
+
+**Definitions Section:**
+- `maturityDate` - Maturity date definition
+- `revolvingCreditCommitment` - Revolving credit commitment
+- `termLoanCommitment` - Term loan commitment
+- `applicableMargin` - Applicable margin definition
+- `abr` - Alternate Base Rate definition
+
+**Negative Covenants:**
+- `debtCovenant` - Debt covenant block
+- `lienCovenant` - Lien covenant block
+- `saleCovenant` - Sale covenant block
+
+**Credits Section:**
+- `abrLoan` - ABR loan interest block
+- `eurodollarLoan` - Eurodollar loan interest block
+- `commitmentFee` - Commitment fee block
+
+**Events of Default:**
+- `paymentDefault` - Payment default event
+- `covenantDefault` - Covenant default event
+- `paymentDefaultPrincipal` - Payment default principal event
+- `paymentDefaultInterest` - Payment default interest event
+- `generalCovenantDefault` - General covenant default event
+
+### Special Cases
+
+#### Cover Page Blocks
+
+For cover pages, Stage 1 returns **normalized values** directly (not verbatim text):
+```json
+{
+  "blockId": "agreementTitle",
+  "valueType": "named_entity",
+  "text": "AMENDED AND RESTATED CREDIT AGREEMENT"  // ← Clean, normalized
+}
+```
+
+Stage 2 is skipped for cover pages since the values are already normalized.
+
+#### "Not Found" Blocks
+
+If a block isn't found in Stage 1:
+```json
+{
+  "blockId": "revolvingCreditCommitment",
+  "valueType": "commitment",
+  "text": "Not Found"
+}
+```
+
+Stage 2 skips these blocks (no LLM call), and the frontend doesn't display them.
+
+#### Multiple Values from One Block
+
+Some blocks extract multiple values. The `blockId` links them all:
+```json
+{
+  "blockId": "debtCovenant",
+  "valueType": "covenant",
+  "values": {
+    "thresholdValues": ["$100M", "$150M", "$200M"],
+    "dates": ["2024-12-31", "2025-12-31", "2026-12-31"]
+  }
+}
+```
+
+All these values share the same `blockId`, so clicking any of them highlights the same block text.
+
+---
+
+## Block Location and Highlighting
+
+### Overview
+
+When you click a value in the dashboard, the system:
+1. **Locates** the block text in the full extracted PDF text
+2. **Highlights** it with a yellow background
+3. **Scrolls** to that location in the document viewer
+
+### How It Works
+
+#### Step 1: Storing the Extracted PDF Text
+
+**PDF Processing:**
+- When a PDF is uploaded, the backend extracts all text
+- Result: One continuous string containing all text from the PDF
+
+**Frontend Storage:**
+- The extracted text is stored in `appState.extractedText`
+- Displayed in a `<pre>` element (preserves whitespace)
+
+#### Step 2: Mapping BlockIds to Block Text
+
+**Stage 1 Results Storage:**
+- After Stage 1 extraction, the frontend builds a mapping:
+  ```javascript
+  appState.blockIdToText[blockId] = blockText
+  ```
+
+**Result**: A dictionary mapping each `blockId` to its extracted block text.
+
+#### Step 3: Clicking a Value
+
+**Click Handler:**
+- When a user clicks a clickable value, it calls `highlightBlock(blockId)`
+- The `blockId` is passed as the identifier
+
+#### Step 4: Locating the Block Text
+
+**The `highlightBlock()` Function:**
+
+1. **Get Block Text**: Looks up block text from `appState.blockIdToText[blockId]`
+2. **Get Document Viewer**: Gets the `<pre>` element containing full PDF text
+3. **Get Original Text**: Gets the original text (before any highlighting)
+4. **Clean Up**: Removes any existing HTML highlights
+5. **Search**: Finds the block text in the full document
+
+**Text Search Strategy:**
+
+**Step 5a: Exact Match (Case-Sensitive)**
+- Uses first 100 characters as search anchor (for performance)
+- Searches for exact match of first 100 chars
+
+**Step 5b: Case-Insensitive Fallback**
+- If exact match fails, tries case-insensitive search
+- If still not found, logs error and gives up
+
+**Why first 100 chars?**
+- Performance: Searching full block text can be slow for long documents
+- Reliability: First 100 chars are usually unique enough to locate the block
+- Flexibility: Handles cases where block text might have minor variations
+
+#### Step 5: Highlighting the Text
+
+**The `highlightTextRange()` Function:**
+
+1. **Split Text**: Splits text into three parts (before, match, after)
+2. **Wrap Match**: Wraps matching text in `<span class="highlighted">`
+3. **Update HTML**: Updates the `<pre>` element's innerHTML
+
+**Visual Result:**
+- Yellow background highlight (`#fff3cd`)
+- Smooth scroll animation
+- Highlighted text centered in viewport
+
+#### Step 6: Scrolling to the Highlight
+
+**Auto-Scroll:**
+- After highlighting, the system scrolls to the highlighted text
+- Uses `scrollIntoView()` with smooth behavior and center alignment
+
+### Challenges and Solutions
+
+#### Challenge 1: Text Variations
+
+**Problem**: The block text from Stage 1 might not exactly match the full PDF text due to whitespace differences, line breaks, special characters.
+
+**Solution**: 
+- Use first 100 chars as anchor (more reliable)
+- Case-insensitive fallback
+- Normalized whitespace matching
+- If still not found, log error and skip highlighting
+
+#### Challenge 2: Performance
+
+**Problem**: Searching entire document text can be slow for large PDFs.
+
+**Solution**:
+- Only search first 100 characters of block text
+- Use native `indexOf()` (fast string search)
+- Clear previous highlights before new search
+
+#### Challenge 3: Multiple Matches
+
+**Problem**: What if the search text appears multiple times?
+
+**Solution**: 
+- `indexOf()` finds the **first** occurrence
+- This is usually correct because blocks are extracted in document order
+- The first match is typically the correct one
+
+#### Challenge 4: HTML Escaping
+
+**Problem**: Block text might contain HTML characters (`<`, `>`, `&`) that break rendering.
+
+**Solution**: All text is HTML-escaped using `escapeHtml()` function before rendering.
+
+### Special Cases Based on Override Reason
+
+- **No Override**: Normal highlighting using original block text
+- **Override Reason = "refinement"**: Normal highlighting (value is correct, just needs formatting)
+- **Override Reason = "incorrect"**: Uses `sourceBlockText` for highlighting (if provided)
+- **Override Reason = "context"**: Highlighting disabled (context may differ)
+
+---
+
 ## Summary
 
-CreditSeer automates the extraction of structured data from credit agreement PDFs using a two-stage, schema-driven LLM architecture. The backend processes PDFs through text extraction, intelligent chunking, Stage 1 block discovery, and Stage 2 value extraction with confidence scoring. The frontend provides an intuitive step-by-step interface for uploading documents and viewing results organized by chunk and block with detailed confidence metadata.
+CreditSeer automates the extraction of structured data from credit agreement PDFs using a two-stage, schema-driven LLM architecture. The backend processes PDFs through text extraction, intelligent chunking, Stage 1 block discovery, and Stage 2 value extraction with confidence scoring. The frontend provides a comprehensive dashboard interface for reviewing, verifying, and correcting extracted values with full traceability to source document text.
 
 **Key Strengths:**
 - Two-stage extraction minimizes hallucination and cross-term contamination
-- Comprehensive PDF processing (text + tables)
+- Comprehensive PDF processing (text + tables with page markers)
 - Intelligent article-based chunking
 - Schema-driven extraction with anti-hallucination measures
-- Multi-factor confidence calculation with detailed breakdowns
+- Multi-factor confidence calculation (7 factors) with detailed breakdowns
 - Block skipping optimization reduces LLM calls by ~42%
-- Step-driven workflow ensures accuracy and transparency
-- Modern, responsive UI
+- Interactive dashboard with clickable values and source text highlighting
+- Value override system with full audit trail (analyst notes, modification history)
+- Document viewer with chunk navigation and automatic highlighting
+- Contextual linking between sections (Fees → Events of Default, etc.)
+- Modern, responsive UI with two-panel design
 - Robust error handling
 - Full text display (no truncation)
+
+**Dashboard Features:**
+- Main Dashboard (70%): Displays extracted data organized by sections (Cover, Facility Overview, Pricing, Fees, Covenants, Events of Default)
+- Value Details Panel (30%): Shows detailed value information with modification capabilities
+- Click-to-highlight: Every value links to source text in document viewer
+- Override system: Analysts can correct/refine values with structured reasons and notes
+- Analyst notes: Private annotations for any extracted value
+- Sample data mode: Preview dashboard without uploading a document
 
 **Areas for Enhancement:**
 - Batch processing (multiple PDFs)
 - Export to Excel/CSV/JSON
+- Save/load dashboard state
 - Custom schemas
 - Historical comparison
 - User authentication
@@ -1552,4 +2007,4 @@ CreditSeer automates the extraction of structured data from credit agreement PDF
 
 ---
 
-*Last Updated: December 2024*
+*Last Updated: January 2025*
