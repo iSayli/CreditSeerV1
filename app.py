@@ -280,7 +280,6 @@ def run_stage2():
                             'blockId': block_id,
                             'valueType': block.get('valueType', ''),
                             'values': {block_id: text},
-                            'confidence': {block_id: {'level': 'High', 'score': 1.0, 'percentage': 100.0, 'factors': [{'factor': 'Stage 1 Direct', 'status': 'Normalized from cover', 'score': 1, 'max': 1}]}},
                             'isCover': True
                         })
                 
@@ -309,7 +308,6 @@ def run_stage2():
                         'blockId': block_id,
                         'valueType': block.get('valueType', ''),
                         'values': {},
-                        'confidence': {},
                         'skipped': True,
                         'reason': 'Block not found in Stage 1'
                     })
