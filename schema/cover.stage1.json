@@ -50,7 +50,7 @@
         "valueType": "named_entity"
       },
       {
-        "fieldId": "syndicationAgents",
+        "fieldId": "leadArrangers",
         "anchorPattern": "as Syndication Agents|as Joint Syndication Agents",
         "notes": "The name of the entity immediately precedes the anchorPattern",
         "collectMultiple": true,

@@ -18,7 +18,7 @@
 ## Application Summary
 
 ### What It Does
-**CreditSeer** is an AI-powered application that automates the extraction of structured data from credit agreement PDF documents using a **two-stage, schema-driven LLM architecture**. The system processes lengthy legal documents (often 100+ pages) through a multi-stage pipeline: PDF text extraction, intelligent chunking by articles, Stage 1 block discovery, and Stage 2 value extraction with confidence scoring. Instead of manually reading through complex credit agreements, users can upload a PDF and receive structured, extracted data organized by document sections with detailed confidence metadata.
+**CreditSeer** is an AI-powered application that automates the extraction of structured data from credit agreement PDF documents using a **two-stage, schema-driven LLM architecture**. The system processes lengthy legal documents (often 100+ pages) through a multi-stage pipeline: PDF text extraction, intelligent chunking by articles, Stage 1 block discovery, and Stage 2 value extraction. Instead of manually reading through complex credit agreements, users can upload a PDF and receive structured, extracted data organized by document sections.
 
 ### Key Benefits
 - **Two-Stage Extraction**: Separates block discovery from value extraction to minimize hallucination and cross-term contamination
@@ -26,10 +26,9 @@
 - **Intelligent Chunking**: Automatically identifies and chunks documents by articles using Table of Contents parsing
 - **Table Handling**: Detects and merges fragmented tables that are common in legal PDFs
 - **Schema-Driven Extraction**: Uses predefined JSON schemas to extract structured data with anti-hallucination measures
-- **Confidence Scoring**: Multi-factor confidence calculation (7 factors) with detailed breakdowns for each extracted value
 - **Block Skipping Optimization**: Automatically skips Stage 2 extraction for blocks not found in Stage 1, reducing LLM calls by ~42%
 - **Step-Driven Workflow**: Upload → Process → Chunk → Stage 1 → Stage 2 workflow ensures accurate data extraction
-- **Transparency**: Provides full extracted text, chunk metadata, block text, and confidence factors for verification
+- **Transparency**: Provides full extracted text, chunk metadata, and block text for verification
 
 ### Use Cases
 - Legal due diligence on credit agreements
@@ -37,7 +36,6 @@
 - Compliance reviews and risk assessment
 - Contract comparison across multiple agreements
 - Automated data extraction for credit analysis systems
-- Confidence-based quality assurance for extracted values
 
 ---
 
@@ -107,7 +105,7 @@ You click the "Run Stage 1" button. For each chunk that has a Stage 1 schema, th
 
 **Result**: You see a list of blocks for each chunk. For cover pages, these are clean, normalized values. For other sections, these are full verbatim text blocks that can be expanded to view.
 
-#### Step 6: Stage 2 - Value Extraction with Confidence
+#### Step 6: Stage 2 - Value Extraction
 You click the "Run Stage 2" button. For each block that was found in Stage 1:
 
 1. **Skips Cover Pages**: Since cover page data was already normalized and extracted in Stage 1, Stage 2 is skipped for these chunks. The Stage 1 results are mapped directly to the final output for consistency.
@@ -115,10 +113,9 @@ You click the "Run Stage 2" button. For each block that was found in Stage 1:
 3. **Loads Stage 2 Schema**: Matches the block's `valueType` to the appropriate schema section.
 4. **Sends to LLM**: Creates a prompt with field definitions, extraction hints, and the block text.
 5. **LLM Extracts Values**: The AI extracts structured values from the block text only.
-6. **Calculates Confidence**: For each extracted value, calculates confidence using 7 factors.
-7. **Returns Results**: Structured values with confidence levels (High/Medium/Low/Not Present) and detailed factor breakdowns.
+6. **Returns Results**: Structured values for each block.
 
-**Result**: You see extracted values organized by block, with confidence levels and expandable details showing how confidence was calculated.
+**Result**: You see extracted values organized by block.
 
 #### Step 7: You Review the Results
 The results appear on your screen showing:
@@ -131,9 +128,6 @@ The results appear on your screen showing:
 Each extraction result includes:
 - The chunk and block it came from
 - All extracted fields with their values
-- Confidence level and percentage (capped at 95% to avoid false certainty)
-- Detailed confidence factors (expandable)
-- Ambiguity flags (if multiple candidates found)
 
 #### Step 8: What If Something Goes Wrong?
 If anything fails during the process, you'll see a clear error message explaining what went wrong. Common issues include:
@@ -145,7 +139,7 @@ If anything fails during the process, you'll see a clear error message explainin
 - Connection errors during LLM calls
 
 ### The Whole Process in One Sentence
-**You upload a PDF → The app extracts all text and tables → You chunk the text by articles → You run Stage 1 to discover blocks → You run Stage 2 to extract values with confidence → You see organized results with confidence metadata.**
+**You upload a PDF → The app extracts all text and tables → You chunk the text by articles → You run Stage 1 to discover blocks → You run Stage 2 to extract values → You see organized results.**
 
 ---
 
@@ -286,14 +280,6 @@ This section details the current limitations and constraints of the application.
   - Can't remove fields you don't care about
   - One-size-fits-all approach
 - **Potential improvement**: Allow users to customize schemas or select which fields to extract.
-
-#### 17. Confidence Calculation Limitations
-- **What it means**: Confidence scores are heuristic-based and may not always reflect ground truth accuracy.
-- **Impact**:
-  - High confidence doesn't guarantee correctness
-  - Some false positives may have high confidence
-  - Confidence capped at 95% to avoid false certainty, but this is still a heuristic
-- **Example**: A value might have 95% confidence but still be wrong if it's the wrong instance among multiple similar values.
 
 ### User Experience Limitations
 
@@ -488,8 +474,8 @@ Understanding these limitations helps users:
 **Stage 2: Value Extraction**
 - Input: Stage 1 blocks + Stage 2 schema
 - Process: LLM extracts structured values from block text only
-- Output: Field-value pairs with confidence metadata
-- Purpose: Extract precise values with confidence scoring
+- Output: Field-value pairs
+- Purpose: Extract precise values
 - Optimization: Skips blocks marked "Not Found" in Stage 1
 
 ---
@@ -518,7 +504,7 @@ CreditSeerV1/
 ├── extraction/                 # Data extraction utilities
 │   ├── __init__.py
 │   ├── stage1_extractor.py    # Stage 1: Block discovery
-│   └── stage2_extractor.py    # Stage 2: Value extraction + confidence
+│   └── stage2_extractor.py    # Stage 2: Value extraction
 │
 ├── schemas/                    # Schema loading utilities
 │   ├── __init__.py
@@ -704,7 +690,7 @@ CreditSeerV1/
 ---
 
 #### 5. `extraction/stage2_extractor.py`
-**Purpose**: Stage 2 - Value extraction with confidence scoring
+**Purpose**: Stage 2 - Value extraction
 
 **Key Function**: `extract(block, chunk_type, schema)`
 
@@ -730,30 +716,8 @@ CreditSeerV1/
    - Temperature: 0.1
    - Parses response into field-value pairs
 
-5. **Confidence Calculation**:
-   - Calculates 7-factor confidence score
-   - Type-aware validation
-   - Anchor proximity scoring
-   - Ambiguity detection
-   - Faithfulness checks (for summarized outputs)
-
-**Key Features:**
-- Field type validation (text, quantitative_metric, date, location, duration, boolean)
-- Format validation with regex patterns
-- Evidence locality checks
-- Anchor proximity scoring
-- Multiple candidate detection
-- Summarized output support
-- Display percentage capped at 95%
-
-**Confidence Factors:**
-1. Value Presence (0-3)
-2. Format Validity (0-2)
-3. Evidence Support (0-2)
-4. Completeness (0-1)
-5. Anchor Proximity (0-1)
-6. Ambiguity Penalty (-0.5 to 0)
-7. Faithfulness (0-1, for summarized outputs)
+5. **Response Parsing**:
+   - Parses response into field-value pairs
 
 **Output Format:**
 ```json
@@ -763,20 +727,6 @@ CreditSeerV1/
   "values": {
     "commitmentAmount": "USD 500,000,000.00"
   },
-  "confidence": {
-    "commitmentAmount": {
-      "level": "High",
-      "score": 8.5,
-      "max_score": 9,
-      "percentage": 94.4,
-      "display_percentage": 94.4,
-      "factors": [...],
-      "isMissing": false,
-      "ambiguousCandidates": false,
-      "multipleMatches": 0,
-      "anchorNotFound": false
-    }
-  }
 }
 ```
 
@@ -811,7 +761,7 @@ CreditSeerV1/
 **State Management:**
 - JavaScript variables for application state
 - Tracks uploaded file, processing results, chunks, Stage 1/2 results
-- Manages UI state (expanded chunks, confidence details)
+- Manages UI state (expanded chunks)
 
 **User Interface Elements:**
 
@@ -839,9 +789,6 @@ CreditSeerV1/
 
 5. **Stage 2 Results Section**:
    - Extracted values organized by block
-   - Confidence levels with color coding
-   - Expandable confidence details
-   - Factor breakdowns
 
 **API Integration:**
 - Makes requests to `http://localhost:5001/api/*`
@@ -920,14 +867,11 @@ CreditSeerV1/
             - Prompt created with field definitions and block text
             - Request sent to OpenAI API
             - Response parsed into field-value pairs
-            - Confidence calculated (7 factors)
         c. Results organized by block
     └─> Stage 2 results returned
 
 11. FRONTEND DISPLAY
     └─> Stage 2 results displayed
-    └─> Values shown with confidence levels
-    └─> Expandable confidence details
     └─> User can review all extractions
 ```
 
@@ -1073,81 +1017,6 @@ CreditSeerV1/
    - Supports collectMultiple for list fields
    - Returns "Not Found" for missing values
 
-5. **Confidence Calculation**:
-   - 7-factor confidence model
-   - Type-aware validation
-   - Format validation with regex
-   - Evidence locality checks
-   - Anchor proximity scoring
-   - Ambiguity detection
-   - Faithfulness checks (for summarized outputs)
-
-**Key Features:**
-- Field type validation (6 types supported)
-- Format validation with regex patterns
-- Evidence locality (exact match for numbers, token matching for text)
-- Anchor proximity (distance to schema pattern)
-- Multiple candidate detection
-- Summarized output support
-- Display percentage capped at 95%
-
----
-
-### 6. Confidence Scoring System
-
-**Location**: `extraction/stage2_extractor.py` (`_calculate_confidence` method)
-
-**7-Factor Model:**
-
-1. **Value Presence** (0-3 points)
-   - Found: 3 points
-   - Not Found: 0 points (marked as "Not Present")
-
-2. **Format Validity** (0-2 points)
-   - Type-aware regex validation
-   - Quantitative metrics: currency, percent, ratio, basis points, numbers
-   - Dates: numeric and month-style
-   - Locations: Section/Schedule/Exhibit references
-   - Durations: time periods
-   - Booleans: Yes/No/True/False/Automatic
-
-3. **Evidence Support** (0-2 points)
-   - Exact substring match for numeric values: 2 points
-   - Meaningful token matching for text: 1-2 points
-   - Anchor coverage for summarized outputs
-
-4. **Completeness** (0-1 point)
-   - List count sanity for multi-value fields
-   - Format validity for single values
-
-5. **Anchor Proximity** (0-1 point)
-   - Distance from schema pattern anchor to extracted value
-   - Within 100 chars: full score
-   - Degrades linearly up to 500 chars
-
-6. **Ambiguity Penalty** (-0.5 to 0)
-   - Detects multiple candidates of same format class
-   - Applies -0.5 penalty if ambiguous
-   - Flags: `ambiguousCandidates`, `multipleMatches`
-
-7. **Faithfulness** (0-1 point, summarized outputs only)
-   - Checks if summary numbers appear in source
-   - Requires key rate terms for rate definitions
-   - Validates summary doesn't introduce new numbers
-
-**Confidence Levels:**
-- **High** (≥75%): Strong confidence across all factors
-- **Medium** (50-74%): Moderate confidence with some uncertainty
-- **Low** (<50%): Low confidence, requires review
-- **Not Present** (0%): Value not found (includes `isMissing: true`)
-
-**Display Percentage:**
-- Internal percentage: Uncapped (0-100%)
-- Display percentage: Capped at 95% to avoid false certainty
-- Ambiguity flags shown in UI
-
----
-
 ### 7. Results Display
 
 **Location**: `frontend/index.html`
@@ -1156,8 +1025,6 @@ CreditSeerV1/
 
 - **Structured Display**: Results organized by chunk and block
 - **Field-Value Pairs**: Clear display of extracted fields
-- **Confidence Levels**: Color-coded confidence badges
-- **Expandable Details**: Confidence factor breakdowns
 - **Block Text View**: Full block text for verification
 - **Navigation**: Step-by-step workflow with buttons
 
@@ -1392,7 +1259,7 @@ CreditSeerV1/
 ---
 
 #### `POST /api/stage2`
-**Purpose**: Stage 2 extraction - Value extraction with confidence
+**Purpose**: Stage 2 extraction - Value extraction
 
 **Request:**
 - Method: `POST`
@@ -1412,20 +1279,6 @@ CreditSeerV1/
           "valueType": "commitment",
           "values": {
             "commitmentAmount": "USD 500,000,000.00"
-          },
-          "confidence": {
-            "commitmentAmount": {
-              "level": "High",
-              "score": 8.5,
-              "max_score": 9,
-              "percentage": 94.4,
-              "display_percentage": 94.4,
-              "factors": [...],
-              "isMissing": false,
-              "ambiguousCandidates": false,
-              "multipleMatches": 0,
-              "anchorNotFound": false
-            }
           }
         }
       ]
@@ -1518,8 +1371,8 @@ index.html (single-page application)
 6. **Stage 1**: User clicks "Run Stage 1" button
 7. **View Blocks**: User sees blocks list with expandable block text (full text)
 8. **Stage 2**: User clicks "Run Stage 2" button
-9. **View Extraction**: User sees structured extraction results with confidence
-10. **Review Confidence**: User can expand confidence details to see factor breakdowns
+9. **View Extraction**: User sees structured extraction results
+10. **Review Results**: User can verify values and navigate the document
 11. **Navigate**: User can reset and start new analysis
 
 ---
@@ -1740,8 +1593,7 @@ Think of `blockId` as a **"bookmark"** that lets you trace any extracted value b
   "values": {
     "commitmentAmount": "$500,000,000",
     "referenceSections": ["Section 2.01"]
-  },
-  "confidence": { ... }
+  }
 }
 ```
 
@@ -1968,14 +1820,13 @@ When you click a value in the dashboard, the system:
 
 ## Summary
 
-CreditSeer automates the extraction of structured data from credit agreement PDFs using a two-stage, schema-driven LLM architecture. The backend processes PDFs through text extraction, intelligent chunking, Stage 1 block discovery, and Stage 2 value extraction with confidence scoring. The frontend provides a comprehensive dashboard interface for reviewing, verifying, and correcting extracted values with full traceability to source document text.
+CreditSeer automates the extraction of structured data from credit agreement PDFs using a two-stage, schema-driven LLM architecture. The backend processes PDFs through text extraction, intelligent chunking, Stage 1 block discovery, and Stage 2 value extraction. The frontend provides a comprehensive dashboard interface for reviewing, verifying, and correcting extracted values with full traceability to source document text.
 
 **Key Strengths:**
 - Two-stage extraction minimizes hallucination and cross-term contamination
 - Comprehensive PDF processing (text + tables with page markers)
 - Intelligent article-based chunking
 - Schema-driven extraction with anti-hallucination measures
-- Multi-factor confidence calculation (7 factors) with detailed breakdowns
 - Block skipping optimization reduces LLM calls by ~42%
 - Interactive dashboard with clickable values and source text highlighting
 - Value override system with full audit trail (analyst notes, modification history)

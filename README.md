@@ -8,7 +8,7 @@ CreditSeer is a step-driven application that ingests credit agreement PDFs and e
 - **Transparent output**: View results at every stage before proceeding
 - **Two-stage extraction**: 
   - Stage 1: Block-level text extraction with valueType assignment
-  - Stage 2: Structured value extraction with confidence metadata
+  - Stage 2: Structured value extraction
 - **Schema-driven**: Extraction follows predefined schemas based on chunk type
 - **Trustworthy**: Designed for credit analysts with full visibility into the process
 
@@ -67,7 +67,7 @@ Then navigate to `http://localhost:8000`
 2. **Process PDF**: Click "Process PDF" to extract text from the document
 3. **Chunk Text**: Click "Chunk Text" to split the document into semantic articles
 4. **Run Stage 1**: Click "Run Stage 1" to extract block-level text with valueTypes
-5. **Run Stage 2**: Click "Run Stage 2" to extract structured values with confidence levels
+5. **Run Stage 2**: Click "Run Stage 2" to extract structured values
 
 ## Architecture
 
@@ -96,7 +96,7 @@ CreditSeerV1/
 2. Text is chunked into semantic articles (definitions, covenants, etc.)
 3. Chunks are classified and mapped to appropriate schemas
 4. **Stage 1**: Extract verbatim block text with valueType assignment
-5. **Stage 2**: Extract structured values from Stage 1 blocks, with confidence metadata
+5. **Stage 2**: Extract structured values from Stage 1 blocks
 
 ## API Endpoints
 
@@ -112,7 +112,6 @@ CreditSeerV1/
 - Show every intermediate output
 - Never hallucinate
 - Isolate text before extracting values
-- Surface uncertainty explicitly
 - Optimize for analyst trust
 
 ## Notes
